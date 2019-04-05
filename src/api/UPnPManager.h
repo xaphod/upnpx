@@ -57,5 +57,6 @@
 - (void)clearAllDevices;
 
 - (void)restartSSDPSearchWithCompletionBlock:(void(^)())completionBlock;
+- (void)startEventServer;
 
 @end

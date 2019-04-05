@@ -75,7 +75,6 @@ static NSTimeInterval const kSSDPRestartDelay = 0.1;
 - (instancetype)init {
     self = [super init];
     if (self) {
-        upnpEvents = [[UPnPEvents alloc] init];
         deviceFactory = [[DeviceFactory alloc] init];
         SSDP = [[SSDPDB_ObjC alloc] init];
         DB = [[UPnPDB alloc] initWithSSDP:SSDP];
@@ -84,10 +83,15 @@ static NSTimeInterval const kSSDPRestartDelay = 0.1;
         _inProcessOfRestart = NO;
 
         [SSDP startSSDP];
-        [upnpEvents start];
     }
 
     return self;
+}
+
+- (void)startEventServer {
+    NSAssert(upnpEvents == nil, @"ERROR");
+    upnpEvents = [[UPnPEvents alloc] init];
+    [upnpEvents start];
 }
 
 - (void)dealloc {
