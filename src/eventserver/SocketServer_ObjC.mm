@@ -83,6 +83,7 @@ private:
     self = [super init];
 
     if (self) {
+        printf("UPNPX: Starting socket server on port 42809\n");
         mCppSocketServer = new SocketServer(42809);
         mCppSocketServerObserverWrapper = new SocketServerObserver_wrapper(self, (SocketServer*)mCppSocketServer);
     }

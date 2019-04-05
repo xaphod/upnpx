@@ -116,7 +116,7 @@ static NSTimeInterval const kSSDPRestartDelay = 0.1;
     [DB clearRootDevices];
 }
 
-- (void)restartSSDPSearchWithCompletionBlock:(void(^)())completionBlock {
+- (void)restartSSDPSearchWithCompletionBlock:(void(^)(void))completionBlock {
     @synchronized(self) {
         if (_inProcessOfRestart) {
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kSSDPRestartDelay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{

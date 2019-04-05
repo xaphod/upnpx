@@ -39,6 +39,7 @@
 #include <stdlib.h>
 
 BasicHTTPServer::BasicHTTPServer(unsigned short prefferedPort){
+    printf("UPNPX: Starting socket server on port %d\n", prefferedPort);
     mServer = new SocketServer(prefferedPort);
     mServer->AddObserver(this);
 }

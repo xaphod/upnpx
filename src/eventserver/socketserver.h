@@ -37,7 +37,7 @@
 
 #include "osal.h"
 #include <arpa/inet.h>
-#include "socketserverobserver.h"
+#include "socketServerobserver.h"
 #include <vector>
 #include "socketserverconnection.h"
 
