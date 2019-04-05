@@ -85,11 +85,8 @@ NSString *const UPnPMediaRenderer1DeviceURN = @"urn:schemas-upnp-org:device:Medi
         [[self connectionManager] GetProtocolInfoWithOutSource:mProtocolInfoSource OutSink:mProtocolInfoSink];
     }
     
-    //@TODO Implement the check ;See Intel PDF "Designing a UPnP av MediaRenderer, 5.3 Mime Types and File Extension Mappings
-    //NSLog(@"@TODO Implement the check ;See Intel PDF 'Designing a UPnP av MediaRenderer, 5.3 Mime Types and File Extension Mappings'");
-    ret = TRUE;
-    
-    return ret;
+    // simple check for now (will likely fail if protocolInfo contains extra stuff or multiple protocols)
+    return [mProtocolInfoSink containsString:protocolInfo];
 }
 
 #pragma mark - Services
