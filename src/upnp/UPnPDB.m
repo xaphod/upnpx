@@ -134,7 +134,7 @@
         [mObservers removeObject:obs];
         ret = [mObservers count];
         [self unlock];
-    }
+    } else { NSAssert(false, @"ERROR"); }
 
     return ret;
 }
@@ -214,7 +214,7 @@
                 }
             }
             [self unlock];
-        }
+        } else { NSAssert(false, @"ERROR"); }
 
         [rootDevices removeObjectsInArray:discardedItems];
 
@@ -226,7 +226,7 @@
                 }
             }
             [self unlock];
-        }
+        } else { NSAssert(false, @"ERROR"); }
     }
     [discardedItems release];
     [self unlock];

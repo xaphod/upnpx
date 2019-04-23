@@ -179,7 +179,7 @@
         [mObservers removeObject:obs];
         ret = [mObservers count];
         [mMutex unlock];
-    }
+    } else { NSAssert(false, @"ERROR"); }
     return ret;
 }
 
@@ -277,7 +277,7 @@
                 [observer deviceServicesDidUpdate:self];
             }
             [mMutex unlock];
-        }
+        } else { NSAssert(false, @"ERROR"); }
     }
 }
 
