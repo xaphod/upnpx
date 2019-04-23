@@ -70,8 +70,8 @@
 /**
  *
  */
-#define STATVAL(ret, excepted, jump) if(ret != excepted){printf("stat error, ret=%d, excepted=%d, errno=%d, line=%d, %s:%s\n", ret, excepted, errno, __LINE__, __FILE__, __FUNCTION__);goto jump;}
+#define STATVAL(ret, excepted, jump) if(ret != excepted){printf("UPNPX ERROR: stat error, ret=%d, excepted=%d, errno=%d, line=%d, %s:%s\n", ret, excepted, errno, __LINE__, __FILE__, __FUNCTION__);goto jump;}
 #define STAT(ret) STATVAL(ret, 0, EXIT)
-#define STATNVAL(ret, notexcepted, jump)if(ret == notexcepted){printf("stat error, ret=%d, not excepted=%d, errno=%d, line=%d, %s:%s\n", ret, notexcepted, errno, __LINE__, __FILE__, __FUNCTION__);goto jump;}
+#define STATNVAL(ret, notexcepted, jump)if(ret == notexcepted){printf("UPNPX ERROR: stat error, ret=%d, not excepted=%d, errno=%d, line=%d, %s:%s\n", ret, notexcepted, errno, __LINE__, __FILE__, __FUNCTION__);goto jump;}
 
 #endif //_OSAL_H
