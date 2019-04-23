@@ -236,21 +236,32 @@
 }
 
 - (BasicUPnPService *)getServiceForType:(NSString *)serviceUrn {
+    NSAssert(![NSThread.currentThread isMainThread], @"error");
     BasicUPnPService *thisService = nil;
 
     [self syncServices];
 
     //Get service
+    dispatch_group_t group = dispatch_group_create();
     @synchronized (servicesLock) {
         thisService = services[serviceUrn];
         if (thisService != nil) {
-            [thisService setup];    // can be called several times, we need to be sure it is done
+            if (!thisService.isSetUp) {
+                dispatch_group_enter(group);
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    [thisService setup:^{
+                        dispatch_group_leave(group);
+                    }];
+                });
+            }
         }
         else {
-            NSLog(@"[UPnP] %s Can't find service of type %@", __FUNCTION__, serviceUrn);
+            NSLog(@"[UPnP] name=%@ Can't find service of type %@", self.friendlyName, serviceUrn);
         }
     }
 
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+    dispatch_release(group);
     return thisService;
 }
 

@@ -152,10 +152,12 @@
 }
 
 // Can be overriden by subclasses if they need ohter kind of parsing
-- (void)setup {
+- (void)setup:(void(^)(void))completionBlock {
     int ret = 0;
 
     if (isSetUp) {
+        if (completionBlock)
+            completionBlock();
         return;
     }
 
@@ -176,6 +178,8 @@
         
         //Start listening for events
         [self subscribeOrResubscribeForEventsWithCompletion:nil];
+        if (completionBlock)
+            completionBlock();
     }];
 }
 
