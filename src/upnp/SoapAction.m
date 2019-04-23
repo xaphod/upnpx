@@ -118,12 +118,12 @@
         [urlRequest setHTTPMethod:@"POST"];
         [urlRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
 
-        [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        [[[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
             NSHTTPURLResponse *urlResponse = (NSHTTPURLResponse*)response;
             self.response = urlResponse;
             self.error = error;
             NSInteger ret = 0;
-
+            
             // Check the Server Return Code @TODO
             if ([urlResponse statusCode] != 200) {
                 ret = -[urlResponse statusCode];
@@ -153,7 +153,7 @@
             [body release];
             
             _mOutput = nil;
-        }];
+        }] resume];
     } // autoreleasepool
 
     // WARNING: retval no longer honored

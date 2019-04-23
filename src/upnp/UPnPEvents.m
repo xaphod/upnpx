@@ -106,12 +106,12 @@ static NSUInteger const kEventSubscriptionTimeoutInSeconds = 1800;
 
         NSLog(@"[UPnP] Subscribing for GENA notifications to URL: %@", [subscriber GetUPnPEventURL]);
 
-        [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        [[[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
             
             NSAssert(![NSThread.currentThread isMainThread], @"ERROR");
             NSString *retUUID = nil;
             NSString *timeOut = nil;
-
+            
             NSHTTPURLResponse *urlResponse = (NSHTTPURLResponse*)response;
             if (urlResponse.statusCode == 200) {
                 NSDictionary *allReturnedHeaders = [urlResponse allHeaderFields];
@@ -153,7 +153,7 @@ static NSUInteger const kEventSubscriptionTimeoutInSeconds = 1800;
             if (completion != nil) {
                 completion(retUUID);
             }
-        }];
+        }] resume];
     });
 }
 
@@ -181,12 +181,12 @@ static NSUInteger const kEventSubscriptionTimeoutInSeconds = 1800;
     [urlRequest setHTTPMethod:@"UNSUBSCRIBE"];
 
     NSLog(@"[UPnP-GENA] Unsubscribing from GENA notifications < %@ >", uuid);
-    [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+    [[[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         NSHTTPURLResponse *urlResponse = (NSHTTPURLResponse*)response;
         if ([urlResponse statusCode] == 200) {
             NSLog(@"[UPnP-GENA] Successfully unsubscribed from GENA notifivations < %@ >", uuid);
         }
-    }];
+    }] resume];
 }
 
 /*
