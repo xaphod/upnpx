@@ -187,34 +187,33 @@ static NSString *ElementStop = @"ElementStop";
     return ret;
 }
 
--(int)parseFromURL:(NSURL*)url{
+-(void)parseFromURL:(NSURL*)url completionBlock:(void (^)(int))completionBlock {
     @autoreleasepool {
-        //Workaround for memory leak
-        //http://blog.filipekberg.se/2010/11/30/nsxmlparser-has-memory-leaks-in-ios-4/
-        [[NSURLCache sharedURLCache] setMemoryCapacity:0];
-        [[NSURLCache sharedURLCache] setDiskCapacity:0];
-
-#warning Change to Async request, sometimes it blocks main thread!
-        NSData *data = [NSData dataWithContentsOfURL:url];
-        if (data != nil) {
-            @autoreleasepool {
-                NSString *xml = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
-                if (xml != nil) {
-                    NSError *error = NULL;
-                    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"^\\s*$\\r?\\n" options:NSRegularExpressionAnchorsMatchLines error:&error];
-                    xml = [regex stringByReplacingMatchesInString:xml options:0 range:NSMakeRange(0, [xml length]) withTemplate:@""];
-
-                    data = [[xml dataUsingEncoding:NSUTF8StringEncoding] retain];
-                } else
-                    return -1;
+        [[[NSURLSession sharedSession] dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            if (data != nil) {
+                @autoreleasepool {
+                    NSString *xml = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+                    if (xml != nil) {
+                        NSError *error = NULL;
+                        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"^\\s*$\\r?\\n" options:NSRegularExpressionAnchorsMatchLines error:&error];
+                        xml = [regex stringByReplacingMatchesInString:xml options:0 range:NSMakeRange(0, [xml length]) withTemplate:@""];
+                        data = [[xml dataUsingEncoding:NSUTF8StringEncoding] retain];
+                    } else {
+                        if (completionBlock)
+                            completionBlock(-1);
+                        return;
+                    }
+                }
+                [data autorelease];
             }
-            [data autorelease];
-        }
-
-        NSXMLParser *parser = [[NSXMLParser alloc] initWithData:data];
-        int ret = [self startParser:parser];
-        [parser release];
-        return ret;
+            
+            NSXMLParser *parser = [[NSXMLParser alloc] initWithData:data];
+            int ret = [self startParser:parser];
+            [parser release];
+            
+            if (completionBlock)
+                completionBlock(ret);
+        }] resume];
     }
 }
 

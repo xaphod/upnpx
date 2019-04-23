@@ -97,7 +97,7 @@
 //Process is called by the ServiceFactory after basic parsing is done and succeeded
 //The BasicUPnPService (this) members are set with the right values
 //Further processing is service dependent and must be handled by the derived classes 
-- (BOOL)setup;
+- (void)setup;
 
 /**
 + Can be called if service is not subscribed for events to retry subscription once more

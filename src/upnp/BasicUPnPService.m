@@ -152,32 +152,31 @@
 }
 
 // Can be overriden by subclasses if they need ohter kind of parsing
-- (BOOL)setup {
+- (void)setup {
     int ret = 0;
 
     if (isSetUp) {
-        return 1;
+        return;
     }
 
     // We need to initialze this class with information from the location URL given by the ssdp 'ssdpdevice'
     BasicServiceParser *parser = [[BasicServiceParser alloc] initWithUPnPService:self];
-    ret = [parser parse];
-    [parser release];
-
-    //Set the soap actions
-    [soap release];
-    if (ret == 0) {
-        soap = [[SoapAction soapActionWithURN:urn andBaseNSURL:baseURL andControlURL:controlURL andEventURL:eventURL] retain];
-        isSetUp = YES;
-    }
-    else {
-        isSetUp = NO;
-    }
-
-    //Start listening for events
-    [self subscribeOrResubscribeForEventsWithCompletion:nil];
-
-    return isSetUp;
+    [parser parse:^(int retval) {
+        [parser release];
+        
+        //Set the soap actions
+        [soap release];
+        if (ret == 0) {
+            soap = [[SoapAction soapActionWithURN:urn andBaseNSURL:baseURL andControlURL:controlURL andEventURL:eventURL] retain];
+            isSetUp = YES;
+        }
+        else {
+            isSetUp = NO;
+        }
+        
+        //Start listening for events
+        [self subscribeOrResubscribeForEventsWithCompletion:nil];
+    }];
 }
 
 - (void)subscribeOrResubscribeForEventsWithCompletion:(void (^)(BOOL success))completion {

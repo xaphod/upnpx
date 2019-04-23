@@ -325,44 +325,36 @@
 
                             upnpdevice.isLoadingDescriptionXML = true;
 
-                            __block NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+                            NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
                                 //fill the upnpdevice with info from the XML
-                                int ret = [upnpdevice loadDeviceDescriptionFromXML];
-
-                                if (op.isCancelled) {
-                                    return;
-                                }
-
-                                if (ret == 0) {
-                                    [self lock];
-
-                                    for (id<UPnPDBObserver> observer in mObservers) {
-                                        if ([observer respondsToSelector:@selector(UPnPDBWillUpdate:)]) {
-                                            [observer UPnPDBWillUpdate:self];
+                                [upnpdevice loadDeviceDescriptionFromXML:^(int ret) {
+                                    if (ret == 0) {
+                                        [self lock];
+                                        
+                                        for (id<UPnPDBObserver> observer in mObservers) {
+                                            if ([observer respondsToSelector:@selector(UPnPDBWillUpdate:)]) {
+                                                [observer UPnPDBWillUpdate:self];
+                                            }
                                         }
-                                    }
-
-                                    //NSLog(@"httpThread upnpdevice, location=%@", [upnpdevice xmlLocation]);
-
-                                    //This is the only place we add devices to the rootdevices
-                                    [rootDevices addObject:upnpdevice];
-
-                                    for (id<UPnPDBObserver> observer in mObservers) {
-                                        if ([observer respondsToSelector:@selector(UPnPDBUpdated:)]) {
-                                            [observer UPnPDBUpdated:self];
+                                        
+                                        //NSLog(@"httpThread upnpdevice, location=%@", [upnpdevice xmlLocation]);
+                                        
+                                        //This is the only place we add devices to the rootdevices
+                                        [rootDevices addObject:upnpdevice];
+                                        
+                                        for (id<UPnPDBObserver> observer in mObservers) {
+                                            if ([observer respondsToSelector:@selector(UPnPDBUpdated:)]) {
+                                                [observer UPnPDBUpdated:self];
+                                            }
                                         }
+                                        
+                                        [self unlock];
                                     }
-
-                                    [self unlock];
-                                }
-
-                                if (op.isCancelled) {
-                                    return;
-                                }
-
-                                @synchronized (readyForDescription) {
-                                    [readyForDescription removeObject:upnpdevice];
-                                }
+                                    
+                                    @synchronized (readyForDescription) {
+                                        [readyForDescription removeObject:upnpdevice];
+                                    }
+                                }];
                             }];
 
                             [xmlLoadingQueue addOperation:op];

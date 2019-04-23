@@ -177,56 +177,53 @@
 /**
  * XML
  */
--(int)parse{
-    int ret=0;
-
+-(void)parse:(void (^)(int))completionBlock {
     NSURL *descurl = [NSURL URLWithString:device.xmlLocation];
-
-    ret = [super parseFromURL:descurl];
-
-
-    //Base URL
-    if([device baseURLString] == nil){
-        //Create one based on [device xmlLocation] 
-        NSURL *loc = [NSURL URLWithString:[device xmlLocation]];
-        if(loc != nil){
-//            NSURL *base = [loc host];
-            [device setBaseURL:loc];
+    [super parseFromURL:descurl completionBlock:^void(int ret) {
+        //Base URL
+        if([device baseURLString] == nil){
+            //Create one based on [device xmlLocation]
+            NSURL *loc = [NSURL URLWithString:[device xmlLocation]];
+            if(loc != nil){
+                //            NSURL *base = [loc host];
+                [device setBaseURL:loc];
+            }
+        }else{
+            NSURL *loc = [NSURL URLWithString:[device baseURLString]];
+            if(loc != nil){
+                [device setBaseURL:loc];
+            }
         }
-    }else{
-        NSURL *loc = [NSURL URLWithString:[device baseURLString]];
-        if(loc != nil){
-            [device setBaseURL:loc];
+        
+        //Manufacturer URL
+        if ([[device manufacturerURLString] length]){
+            NSURL *loc = [NSURL URLWithString:[device manufacturerURLString]];
+            if(loc != nil){
+                [device setManufacturerURL:loc];
+            }
         }
-    }
-
-    //Manufacturer URL
-    if ([[device manufacturerURLString] length]){
-        NSURL *loc = [NSURL URLWithString:[device manufacturerURLString]];
-        if(loc != nil){
-            [device setManufacturerURL:loc];
+        
+        //Model URL
+        if ([[device modelURLString] length]){
+            NSURL *loc = [NSURL URLWithString:[device modelURLString]];
+            if(loc != nil){
+                [device setModelURL:loc];
+            }
         }
-    }
-    
-    //Model URL
-    if ([[device modelURLString] length]){
-        NSURL *loc = [NSURL URLWithString:[device modelURLString]];
-        if(loc != nil){
-            [device setModelURL:loc];
-        }
-    }
-
-    //load icon if any
-#if TARGET_OS_IPHONE
-    if(ret == 0 && iconURL != nil){
-        NSURL *u = [NSURL URLWithString:iconURL relativeToURL:device.baseURL];
-        NSData *imageData = [NSData dataWithContentsOfURL:u];
-        UIImage *i = [UIImage imageWithData:imageData];
-        [device setSmallIcon:i];
-    }
-#endif
-
-    return ret;
+        
+        //load icon if any
+        //#if TARGET_OS_IPHONE
+        //    if(ret == 0 && iconURL != nil){
+        //        NSURL *u = [NSURL URLWithString:iconURL relativeToURL:device.baseURL];
+        //        NSData *imageData = [NSData dataWithContentsOfURL:u];
+        //        UIImage *i = [UIImage imageWithData:imageData];
+        //        [device setSmallIcon:i];
+        //    }
+        //#endif
+        
+        if (completionBlock)
+            completionBlock(ret);
+    }];
 }
 
 

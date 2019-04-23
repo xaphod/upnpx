@@ -96,7 +96,7 @@ static NSUInteger const kEventSubscriptionTimeoutInSeconds = 1800;
 
         NSString *callBack = [NSString stringWithFormat:@"<http://%@:%d/Event>", [server getIPAddress], [server getPort]];
 
-        [urlRequest setValue:@"iOS UPnP/1.1 UPNPX/1.3.1" forHTTPHeaderField:@"USER-AGENT"];
+        [urlRequest setValue:@"iOS UPnP/1.1 UPNPX/1.4.2" forHTTPHeaderField:@"USER-AGENT"];
         [urlRequest setValue:callBack forHTTPHeaderField:@"CALLBACK"];
         [urlRequest setValue:@"upnp:event" forHTTPHeaderField:@"NT"];
         [urlRequest setValue:[NSString stringWithFormat:@"Second-%lu", (unsigned long)kEventSubscriptionTimeoutInSeconds]
@@ -175,7 +175,7 @@ static NSUInteger const kEventSubscriptionTimeoutInSeconds = 1800;
     //    UNSUBSCRIBE dude HTTP/1.1
     //    Host: iamtheproxy:203
     //    SID: uuid:kj9d4fae-7dec-11d0-a765-00a0c91e6bf6
-    [urlRequest setValue:@"iOS UPnP/1.1 UPNPX/1.3.1" forHTTPHeaderField:@"USER-AGENT"];
+    [urlRequest setValue:@"iOS UPnP/1.1 UPNPX/1.4.2" forHTTPHeaderField:@"USER-AGENT"];
     [urlRequest setValue:uuid forHTTPHeaderField:@"SID"];
 
     [urlRequest setHTTPMethod:@"UNSUBSCRIBE"];

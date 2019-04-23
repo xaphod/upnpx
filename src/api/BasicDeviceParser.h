@@ -57,7 +57,7 @@
 }
 
 -(instancetype)initWithUPnPDevice:(BasicUPnPDevice*)upnpdevice NS_DESIGNATED_INITIALIZER;
-@property (NS_NONATOMIC_IOSONLY, readonly) int parse;
+-(void)parse:(void (^)(int))completionBlock;
 -(void)iconFound:(NSString*)startStop;
 -(void)embeddedDevice:(NSString*)startStop;
 -(void)rootDevice:(NSString*)startStop;

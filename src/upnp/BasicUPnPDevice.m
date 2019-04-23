@@ -149,17 +149,19 @@
     [super dealloc];
 }
 
-- (int)loadDeviceDescriptionFromXML {
-    int ret = 0;
+- (void)loadDeviceDescriptionFromXML:(void (^)(int))completionBlock {
     if (xmlLocation == nil || [xmlLocation length] < 5) {
-        return -1;
+        if (completionBlock)
+            completionBlock(-1);
+        return;
     }
 
     BasicDeviceParser *parser = [[BasicDeviceParser alloc] initWithUPnPDevice:self];
-    ret = [parser parse];
-    [parser release];
-
-    return ret;
+    [parser parse:^(int ret) {
+        [parser release];
+        if (completionBlock)
+            completionBlock(ret);
+    }];
 }
 
 - (NSUInteger)addObserver:(id <BasicUPnPDeviceObserver>)obs {

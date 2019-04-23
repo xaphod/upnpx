@@ -48,7 +48,7 @@
 
 -(void)clearAllAssets;
 -(int)addAsset:(NSArray*)path callfunction:(SEL)function functionObject:(id)funcObj setStringValueFunction:(SEL)valueFunction setStringValueObject:(id)obj;
--(int)parseFromURL:(NSURL*)url;
+-(void)parseFromURL:(NSURL*)url completionBlock:(void (^)(int))completionBlock;
 -(int)parseFromData:(NSData*)data;
 
 -(BasicParserAsset*)getAssetForElementStack:(NSMutableArray*)stack;

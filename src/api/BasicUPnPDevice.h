@@ -116,7 +116,7 @@
 - (instancetype)initWithSSDPDevice:(SSDPDBDevice_ObjC*)ssdp;
 - (BasicUPnPService *)getServiceForType:(NSString*)serviceUrn;
 
-- (int)loadDeviceDescriptionFromXML;
+- (void)loadDeviceDescriptionFromXML:(void (^)(int))completionBlock;
 
 - (NSUInteger)addObserver:(id <BasicUPnPDeviceObserver>)obs;
 - (NSUInteger)removeObserver:(id <BasicUPnPDeviceObserver>)obs;

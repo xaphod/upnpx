@@ -55,7 +55,7 @@
 
 -(instancetype)initWithUPnPService:(BasicUPnPService*)upnpservice;
 
-- (int)parse;
+-(void)parse:(void (^)(int))completionBlock;
 
 -(void)serviceTag:(NSString*)startStop;
 -(void)stateVariable:(NSString*)startStop;
