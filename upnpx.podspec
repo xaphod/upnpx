@@ -1,8 +1,8 @@
 Pod::Spec.new do |s|
   s.name     = 'upnpx'
-  s.version  = '1.4.1'
+  s.version  = '1.4.2'
   s.license  = 'BSD'
-  s.ios.deployment_target = "6.1"
+  s.ios.deployment_target = "9.0"
   s.osx.deployment_target = "10.8"
   s.tvos.deployment_target = '9.0'
   s.summary  = 'Open Source Mac OS X / iOS Cocoa UPnP Stack.'

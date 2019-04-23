@@ -69,8 +69,6 @@ NSString *const UPnPMediaRenderer1DeviceURN = @"urn:schemas-upnp-org:device:Medi
 }
 
 - (BOOL)supportProtocol:(NSString*)protocolInfo withCache:(BOOL)useCache {
-    BOOL ret = NO;
-    
     // Cache the protocolInfo
     if (useCache == YES && mProtocolInfoSink != nil && mProtocolInfoSource != nil) {
         // Don't do soap

@@ -88,8 +88,6 @@ static NSUInteger const kEventSubscriptionTimeoutInSeconds = 1800;
 
 -(void)subscribe:(id<UPnPEvents_Observer>)subscriber completion:(void (^)(NSString * __nullable uuid))completion {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSString *retUUID = nil;
-        NSString *timeOut = nil;
 
         //Construct the HTML SUBSCRIBE
         NSMutableURLRequest *urlRequest = [NSMutableURLRequest requestWithURL:[subscriber GetUPnPEventURL]
@@ -108,49 +106,54 @@ static NSUInteger const kEventSubscriptionTimeoutInSeconds = 1800;
 
         NSLog(@"[UPnP] Subscribing for GENA notifications to URL: %@", [subscriber GetUPnPEventURL]);
 
-        NSHTTPURLResponse *urlResponse = nil;
-        [NSURLConnection sendSynchronousRequest:urlRequest returningResponse:&urlResponse error:nil];
-        if ([urlResponse statusCode] == 200) {
-            NSDictionary *allReturnedHeaders = [urlResponse allHeaderFields];
-            for (NSString *key in allReturnedHeaders) {
-                if ([key caseInsensitiveCompare:@"SID"] == NSOrderedSame) {
-                    retUUID = [NSString stringWithString:allReturnedHeaders[key]];
-                }
-                if ([key caseInsensitiveCompare:@"TIMEOUT"] == NSOrderedSame) {
-                    timeOut = [NSString stringWithString:allReturnedHeaders[key]];
-                }
-            }
-        }
+        [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            
+            NSAssert(![NSThread.currentThread isMainThread], @"ERROR");
+            NSString *retUUID = nil;
+            NSString *timeOut = nil;
 
-        //Add to the subscription Dictionary
-        [mMutex lock];
-        if (retUUID) {
-            ObserverEntry *en = [[ObserverEntry alloc] init];
-
-            en.observer = subscriber;
-            en.subscriptiontime = [[NSDate date] timeIntervalSince1970];
-
-            NSRange r = [timeOut rangeOfString:@"Second-"];
-            if (r.length > 0) {
-                en.timeout = [[timeOut substringFromIndex:r.location + r.length] intValue];
-                if (en.timeout < 300) {
-                    en.timeout = 300;
+            NSHTTPURLResponse *urlResponse = (NSHTTPURLResponse*)response;
+            if (urlResponse.statusCode == 200) {
+                NSDictionary *allReturnedHeaders = [urlResponse allHeaderFields];
+                for (NSString *key in allReturnedHeaders) {
+                    if ([key caseInsensitiveCompare:@"SID"] == NSOrderedSame) {
+                        retUUID = [NSString stringWithString:allReturnedHeaders[key]];
+                    }
+                    if ([key caseInsensitiveCompare:@"TIMEOUT"] == NSOrderedSame) {
+                        timeOut = [NSString stringWithString:allReturnedHeaders[key]];
+                    }
                 }
             }
-            NSLog(@"[UPnP-GENA] Subscribed successfully < uuid: %@ | timeout: %d >", retUUID, en.timeout);
-
-            mEventSubscribers[retUUID] = en;
-            [en release];
-        }
-        else {
-            NSLog(@"[UPnP-GENA] Cannot subscribe for events, server return code : %ld", (long)[urlResponse statusCode]);
-        }
-        [mMutex unlock];
-
-        if (completion != nil) {
-            completion(retUUID);
-        }
-        
+            
+            //Add to the subscription Dictionary
+            [mMutex lock];
+            if (retUUID) {
+                ObserverEntry *en = [[ObserverEntry alloc] init];
+                
+                en.observer = subscriber;
+                en.subscriptiontime = [[NSDate date] timeIntervalSince1970];
+                
+                NSRange r = [timeOut rangeOfString:@"Second-"];
+                if (r.length > 0) {
+                    en.timeout = [[timeOut substringFromIndex:r.location + r.length] intValue];
+                    if (en.timeout < 300) {
+                        en.timeout = 300;
+                    }
+                }
+                NSLog(@"[UPnP-GENA] Subscribed successfully < uuid: %@ | timeout: %d >", retUUID, en.timeout);
+                
+                mEventSubscribers[retUUID] = en;
+                [en release];
+            }
+            else {
+                NSLog(@"[UPnP-GENA] Cannot subscribe for events, server return code : %ld", (long)[urlResponse statusCode]);
+            }
+            [mMutex unlock];
+            
+            if (completion != nil) {
+                completion(retUUID);
+            }
+        }];
     });
 }
 
@@ -178,14 +181,12 @@ static NSUInteger const kEventSubscriptionTimeoutInSeconds = 1800;
     [urlRequest setHTTPMethod:@"UNSUBSCRIBE"];
 
     NSLog(@"[UPnP-GENA] Unsubscribing from GENA notifications < %@ >", uuid);
-
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSHTTPURLResponse *urlResponse = nil;
-        [NSURLConnection sendSynchronousRequest:urlRequest returningResponse:&urlResponse error:nil];
+    [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        NSHTTPURLResponse *urlResponse = (NSHTTPURLResponse*)response;
         if ([urlResponse statusCode] == 200) {
             NSLog(@"[UPnP-GENA] Successfully unsubscribed from GENA notifivations < %@ >", uuid);
         }
-    });
+    }];
 }
 
 /*

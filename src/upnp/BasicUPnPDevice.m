@@ -213,11 +213,11 @@
 
             // toAdd and toRemove are filled now, first remove services if needed
             for (NSString *key in toRemove) {
-                NSLog(@"[UPnP] Sync Service (%@). Removing %@", self.friendlyName, key);
+                NSLog(@"[UPnP] Sync Service %@ = %@. Removing %@", uuid, self.friendlyName, key);
                 [services removeObjectForKey:key];
             }
             for (NSString *key in toAdd) {
-                NSLog(@"[UPnP] Sync Service (%@). Adding %@", self.friendlyName, key);
+                NSLog(@"[UPnP] Sync Service %@ = %@. Adding %@", uuid, self.friendlyName, key);
                 services[key] = toAdd[key];
             }
 

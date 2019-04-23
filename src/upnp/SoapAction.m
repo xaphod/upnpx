@@ -81,13 +81,11 @@
 
 
 
--(NSInteger)action:(NSString*)soapAction parameters:(NSDictionary*)parameters returnValues:(NSDictionary*)output{
-    NSUInteger len=0;
-    NSInteger ret = 0;
-
+-(NSInteger)action:(NSString*)soapAction parameters:(NSDictionary*)parameters returnValues:(NSDictionary*)output {
     _mOutput = output;//we need it as a member to fill it during parsing
 
     @autoreleasepool {
+        NSUInteger len=0;
 
         //SOAP Message to Send
         NSMutableString *body = [[NSMutableString alloc] init];
@@ -120,46 +118,46 @@
         [urlRequest setHTTPMethod:@"POST"];
         [urlRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
 
+        [[NSURLSession sharedSession] dataTaskWithRequest:urlRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            NSHTTPURLResponse *urlResponse = (NSHTTPURLResponse*)response;
+            self.response = urlResponse;
+            self.error = error;
+            NSInteger ret = 0;
 
-        NSHTTPURLResponse *urlResponse;
-        NSError *error = nil;
-        NSData *resp = [NSURLConnection sendSynchronousRequest:urlRequest returningResponse:&urlResponse error:&error];
-        self.response = urlResponse;
-        self.error = error;
-
-        // Check the Server Return Code @TODO
-        if ([urlResponse statusCode] != 200) {
-            ret = -[urlResponse statusCode];
-            NSString *rsp = [[NSString  alloc] initWithData:resp encoding:NSUTF8StringEncoding];
-            NSLog(@"[UPnP] Error (SoapAction): Got a non 200 response: %ld. Data: %@", (long)[urlResponse statusCode], rsp);
-            [rsp release];
-            if (ret == 0) {
-                ret = -408; // Why 408?
+            // Check the Server Return Code @TODO
+            if ([urlResponse statusCode] != 200) {
+                ret = -[urlResponse statusCode];
+                NSString *rsp = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                NSLog(@"[UPnP] Error (SoapAction): Got a non 200 response: %ld. Data: %@", (long)[urlResponse statusCode], rsp);
+                [rsp release];
+                if (ret == 0) {
+                    ret = -408; // Why 408?
+                }
+            } else {
+                ret = 0;
             }
-        }
-        else {
-            ret = 0;
-        }
-
-        if (ret == 0 && [resp length] > 0 ) {
-            //Parse result
-            //Clear the assets becuase the action can be re-used
-            [self clearAllAssets];
-            NSString *responseGroupTag = [NSString stringWithFormat:@"%@Response", soapAction];
-            for (id key in output) {
-                [self addAsset:@[@"Envelope", @"Body", responseGroupTag, (NSString*)key] callfunction:nil functionObject:nil setStringValueFunction:@selector(setStringValueForFoundAsset:) setStringValueObject:self];
+            
+            if (ret == 0 && [data length] > 0 ) {
+                //Parse result
+                //Clear the assets becuase the action can be re-used
+                [self clearAllAssets];
+                NSString *responseGroupTag = [NSString stringWithFormat:@"%@Response", soapAction];
+                for (id key in output) {
+                    [self addAsset:@[@"Envelope", @"Body", responseGroupTag, (NSString*)key] callfunction:nil functionObject:nil setStringValueFunction:@selector(setStringValueForFoundAsset:) setStringValueObject:self];
+                }
+                
+                //uShare Issues here, can not handle names like 'Bj~rk
+                ret = [super parseFromData:data];
             }
+            
+            [body release];
+            
+            _mOutput = nil;
+        }];
+    } // autoreleasepool
 
-            //uShare Issues here, can not handle names like 'Bj~rk
-            ret = [super parseFromData:resp];
-        }
-
-        [body release];
-
-        _mOutput = nil;
-    }
-
-    return ret;
+    // WARNING: retval no longer honored
+    return 0;
 }
 
 
